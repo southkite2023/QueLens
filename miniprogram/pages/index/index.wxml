@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="title">雀镜</view>
+  <view class="muted intro">成都血战到底 · 牌型学习助手</view>
+  <view class="card">
+    <picker mode="selector" range="{{suits}}" value="{{missingIndex}}" bindchange="changeSuit"><view>定缺：{{suits[missingIndex]}}　›</view></picker>
+    <view class="muted">录入含胡牌张的14张手牌。本版仅支持未碰杠的手牌。</view>
+    <view class="tiles"><button wx:for="{{palette}}" wx:key="id" class="tile" data-id="{{item.id}}" bindtap="addTile">{{item.label}}</button></view>
+  </view>
+  <view class="card">
+    <view>已选 {{count}} / 14 张</view>
+    <view class="muted">点击已选牌可移除</view>
+    <view class="tiles"><button wx:for="{{selected}}" wx:key="index" class="tile chosen" data-index="{{item.index}}" bindtap="removeTile">{{item.label}}</button></view>
+    <button class="primary" bindtap="calculate">检查牌型</button>
+    <button bindtap="clear">清空手牌</button>
+    <button bindtap="sample">载入练习示例</button>
+  </view>
+  <view wx:if="{{result}}" class="card result">{{result}}</view>
+  <view class="muted">番数规则正在确认。拍照识牌将在准备完成后开放。</view>
+  <button bindtap="about">使用说明与隐私</button>
+</view>

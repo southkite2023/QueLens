@@ -1,0 +1,12 @@
+<view class="container">
+  <view class="card">
+    <view class="title">使用说明</view>
+    <view class="paragraph">雀镜帮助学习麻将牌型。当前支持成都血战到底的万、筒、条，须打完定缺花色。点击牌面录入14张含胡牌张的手牌。</view>
+    <view class="paragraph">当前仅支持未碰杠手牌的结构判断。番数表、特殊事件番和整局结算尚未开放，结果不能代替完整规则判定。</view>
+  </view>
+  <view class="card">
+    <view class="title">隐私说明</view>
+    <view class="paragraph">本开发版的手牌仅在当前页面内存中处理，退出后不保存；不上传手牌，不使用登录、手机号、定位或第三方统计。</view>
+    <view class="paragraph">拍照入口尚未开放，当前不会读取照片。后续启用时将在选择照片前说明用途并获取授权。</view>
+  </view>
+</view>
