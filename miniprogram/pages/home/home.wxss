@@ -1,0 +1,26 @@
+.atlas { padding-top: 44rpx; }
+.eyebrow { font-size: 22rpx; letter-spacing: 4rpx; color: #5b7069; margin-bottom: 24rpx; }
+.hero-title { font-size: 52rpx; font-weight: 600; margin-bottom: 16rpx; }
+.location-panel { margin: 36rpx 0 44rpx; padding: 28rpx; border: 1rpx solid #d5e1da; border-radius: 24rpx; background: #fffdf8; }
+.location-title { margin-bottom: 10rpx; font-weight: 600; }
+.location-message { margin-top: 18rpx; font-size: 26rpx; line-height: 1.6; }
+.section-heading { font-size: 32rpx; font-weight: 600; margin-bottom: 24rpx; }
+.section-small { display: block; font-size: 24rpx; font-weight: 400; color: #5b7069; margin-top: 8rpx; }
+.region-card { position: relative; display: block; width: calc((100% - 20rpx) / 2); text-align: left; padding: 24rpx; margin: 0 0 20rpx; border-radius: 28rpx; overflow: hidden; color: #203c34; line-height: 1.5; min-height: 340rpx; box-sizing: border-box; }
+.region-card::after, .text-button::after { border: 0; }
+.jade { background: #e3eee4; }
+.sand { background: #f1e8d6; }
+.rose { background: #f2e3df; }
+.region-art { position: absolute; right: -10rpx; bottom: 0; width: 240rpx; height: 160rpx; opacity: .24; }
+.card-copy { position: relative; width: 100%; }
+.card-tag { font-size: 21rpx; letter-spacing: 2rpx; margin-bottom: 14rpx; }
+.card-name { font-size: 34rpx; font-weight: 600; }
+.card-caption { font-size: 24rpx; margin: 10rpx 0 24rpx; }
+.card-link { font-size: 24rpx; }
+.footer-note { text-align: center; color: #5b7069; font-size: 23rpx; margin-top: 30rpx; }
+.text-button { background: transparent; color: #5b7069; font-size: 24rpx; }
+
+.card-grid { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: stretch; }
+.card-link { margin-top: 36rpx; }
+
+.card-grid .region-card { margin-left: 0; margin-right: 0; }

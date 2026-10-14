@@ -1,20 +1,52 @@
-<view class="container">
-  <view class="title">雀镜</view>
-  <view class="muted intro">成都血战到底 · 牌型学习助手</view>
-  <view class="card">
-    <picker mode="selector" range="{{suits}}" value="{{missingIndex}}" bindchange="changeSuit"><view>定缺：{{suits[missingIndex]}}　›</view></picker>
-    <view class="muted">录入含胡牌张的14张手牌。本版仅支持未碰杠的手牌。</view>
-    <view class="tiles"><button wx:for="{{palette}}" wx:key="id" class="tile" data-id="{{item.id}}" bindtap="addTile">{{item.label}}</button></view>
+<view class="container practice">
+  <view class="title">成都麻将</view><view class="muted intro">选好牌面，再说说这一手怎么胡。</view>
+  <view class="card tile-card">
+    <view class="section-title">选牌</view><view class="suit-row"><text>定缺</text><view class="chips compact"><button wx:for="{{suits}}" wx:key="*this" class="chip {{missingIndex === index ? 'active' : ''}}" data-key="missingIndex" data-value="{{index}}" bindtap="choose">{{item}}</button></view></view>
+    <view class="muted">万、筒、条各一排；碰杠从下方已选手牌转入。</view>
+    <view class="tiles palette"><button wx:for="{{palette}}" wx:key="id" class="tile suit-{{item.suit}}" data-id="{{item.id}}" bindtap="addTile" aria-label="录入{{item.label}}">{{item.label}}</button></view>
+  </view>
+  <view class="card tile-card">
+    <view class="section-title">手牌 <text class="count">{{count}} / {{target}}</text></view><view class="muted">包含胡牌张。点一张牌，再选碰、杠或移除。</view>
+    <view class="tiles selected"><button wx:for="{{selected}}" wx:key="index" class="tile chosen {{item.focused ? 'focused' : ''}}" data-index="{{item.index}}" bindtap="selectTile" aria-label="选中{{item.label}}">{{item.label}}</button></view>
+    <view wx:if="{{selectedIndex >= 0}}" class="tile-actions"><view class="muted">已选 {{focusedLabel}}</view><view class="chips"><button class="chip" data-type="pong" bindtap="makeMeld">碰 · 转入3张</button><button class="chip" data-type="kong" bindtap="makeMeld">杠 · 转入4张</button><button class="chip remove-chip" bindtap="removeFocused">移除这张</button></view></view>
+    <view wx:if="{{count > target}}" class="validation-hint">手牌多出{{count - target}}张，请移除多余牌。</view>
+    <button class="clear-button" bindtap="clear">清空牌面</button>
+  </view>
+  <view class="card tile-card exposed">
+    <view class="section-title">明牌 · 碰杠 <text class="count">{{melds.length}}组</text></view>
+    <view wx:if="{{!melds.length}}" class="empty-meld"><view>还没有碰杠</view><view>在手牌中点选同牌，转入这里。</view></view>
+    <view class="meld-list"><button wx:for="{{melds}}" wx:key="tile" class="meld-group" data-index="{{index}}" bindtap="restoreMeld"><view class="meld-title">{{item.name}} <text>点此退回手牌</text></view><view class="meld-tiles"><text wx:for="{{item.tiles}}" wx:for-item="tile" wx:key="slot" class="mini-tile">{{tile.label}}</text></view></button></view>
+    <view wx:if="{{melds.length}}" class="muted">杠后需补牌。退回完整杠牌时可能多出一张，请手动移除补牌。</view>
   </view>
   <view class="card">
-    <view>已选 {{count}} / 14 张</view>
-    <view class="muted">点击已选牌可移除</view>
-    <view class="tiles"><button wx:for="{{selected}}" wx:key="index" class="tile chosen" data-index="{{item.index}}" bindtap="removeTile">{{item.label}}</button></view>
-    <button class="primary" bindtap="calculate">检查牌型</button>
-    <button bindtap="clear">清空手牌</button>
-    <button bindtap="sample">载入练习示例</button>
+    <view class="section-title">胡牌经过</view>
+    <view class="choice-label">胡牌方式</view><view class="chips"><button wx:for="{{winTypes}}" wx:key="*this" class="chip {{winIndex === index ? 'active' : ''}}" data-key="winIndex" data-value="{{index}}" bindtap="choose">{{item}}</button></view>
+    <view class="choice-label">开局</view><view class="chips"><button wx:for="{{openings}}" wx:key="*this" class="chip {{openingIndex === index ? 'active' : ''}}" data-key="openingIndex" data-value="{{index}}" bindtap="choose">{{item}}</button></view>
+    <view class="choice-label">杠后情况</view><view class="chips"><button wx:for="{{finishes}}" wx:key="*this" class="chip {{finishIndex === index ? 'active' : ''}}" data-key="finishIndex" data-value="{{index}}" bindtap="choose">{{item}}</button></view>
+    <view class="choice-label">其他经过 · 可多选</view><view class="chips"><button class="chip {{sea ? 'active' : ''}}" data-key="sea" bindtap="toggleEvent">海底</button><button class="chip {{declaredReady ? 'active' : ''}}" data-key="declaredReady" bindtap="toggleEvent">报叫</button></view>
+    <view class="muted event-help">天胡：庄家起手即胡。地胡：闲家起手听牌，首轮自摸。海底：最后一张摸牌或该牌打出后胡。报叫：开局宣布听牌后不改变手牌。按实际经过点选。</view>
   </view>
-  <view wx:if="{{result}}" class="card result">{{result}}</view>
-  <view class="muted">番数规则正在确认。拍照识牌将在准备完成后开放。</view>
-  <button bindtap="about">使用说明与隐私</button>
+  <view class="card">
+    <view class="section-title">计分设置</view><view class="number-grid"><label><text>底分</text><input type="digit" value="{{base}}" bindinput="changeBase" maxlength="10" /></label><view class="cap-field"><text>封顶番数</text><picker range="{{caps}}" value="{{capIndex}}" bindchange="changeCap"><view class="cap-value">{{cap}} 番　⌄</view></picker></view></view>
+    <view class="muted">自摸默认加1番（翻倍），总番含自摸及特殊加番，最多计至所选封顶。天地胡固定5番，不再加自摸番。</view>
+    <button class="rules-toggle" bindtap="toggleRules">{{rulesExpanded ? '收起参考番表' : '查看参考番表与来源'}}　{{rulesExpanded ? '−' : '+'}}</button>
+    <view wx:if="{{rulesExpanded}}"><view class="muted">0番＝1倍，番数相加、倍数相乘。参考场规，不同牌桌可能有差异。</view><view class="rule-table"><view wx:for="{{ruleFields}}" wx:key="key" class="rule-row"><text>{{item.name}}</text><text>{{item.value}} 番</text></view></view><view class="muted">基础牌型取最高候选；清一色与未包含的根另加。龙七对已含1根。金钩钓须4组碰杠，将对为全2/5/8的对对胡，带幺九须每组面子与将均带1或9。</view><button wx:for="{{sources}}" wx:key="url" class="source-link" data-index="{{index}}" bindtap="copySource">{{item.title}} · 复制链接</button></view>
+  </view>
+  <button class="primary calculate" bindtap="calculate">算一算这手牌</button>
+  <view wx:if="{{result}}" class="card result">
+    <view>{{result}}</view>
+    <view wx:if="{{scoring}}">
+      <view class="equation-label">底分 × 2的番数次方</view>
+      <view wx:if="{{formulaVisible}}" class="equation heat-{{scoring.fan}}" role="text" aria-label="{{scoring.base}}乘2的{{scoring.fan}}次方等于{{scoring.points}}分">
+        <text class="formula-base">{{scoring.base}}</text><text class="operator">×</text><view class="power"><text>2</text><text class="exponent {{scoring.fanClass}}" style="color: {{scoring.color}}">{{scoring.fan}}</text></view><text class="operator equals">＝</text><text class="formula-value {{scoring.fanClass}}" style="color: {{scoring.color}}">{{scoring.points}}</text><text class="points-unit">分</text>
+      </view>
+      <view class="muted equation-caption">{{scoring.base}} 乘 2 的 {{scoring.fan}} 次方 ＝ {{scoring.points}} 分</view>
+      <view class="fan-summary">{{scoring.rawFan}} 番 → {{scoring.fan}} 番 <text>{{scoring.rawFan > scoring.fan ? '已达封顶' : '当前计分'}}</text> · {{scoring.cap}}番封顶</view>
+      <view class="section-title breakdown-title">这手牌的组成</view>
+      <view wx:for="{{scoring.lines}}" wx:key="key" class="score-line tone-{{item.tone}}"><view class="role-name">{{item.label}}</view><view class="role-value"><text>{{item.fan}} 番</text><text class="role-factor">×{{item.factor}}</text></view></view>
+      <view class="muted">龙七对3番对应×8倍，清一色2番对应×4倍；各项倍数相乘后再按封顶计算。</view>
+      <view class="muted result-note">单份胡牌分值，未乘付款人数，不含杠结算、包赔、查叫和退税。</view>
+    </view>
+  </view>
+  <view class="muted">更改牌面或选项后请重新计算。</view><button bindtap="about">使用说明与隐私</button>
 </view>

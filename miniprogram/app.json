@@ -1,5 +1,8 @@
 {
   "pages": [
+    "pages/home/home",
+    "pages/region/region",
+    "pages/play/play",
     "pages/index/index",
     "pages/about/about"
   ],
@@ -10,5 +13,13 @@
     "backgroundColor": "#f5f8f7"
   },
   "style": "v2",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于匹配附近城市的麻将玩法，仅点击定位时读取，不保存或上传"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ]
 }

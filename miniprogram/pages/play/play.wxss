@@ -1,0 +1,3 @@
+@import "../home/home.wxss";
+.play-banner { border-radius: 28rpx; padding: 28rpx; margin-bottom: 28rpx; }
+.play-art { display: block; width: 100%; height: 300rpx; margin-bottom: 20rpx; }

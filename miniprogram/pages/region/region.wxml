@@ -1,0 +1,4 @@
+<view class="container atlas" wx:if="{{region}}">
+  <view class="eyebrow">QUE LENS · 地方牌趣</view><view class="hero-title">{{region.name}}</view><view class="muted">{{region.caption}}，选一款熟悉的玩法。</view>
+  <view class="variant-list card-grid"><button wx:for="{{variants}}" wx:key="id" class="region-card {{item.tone}}" data-id="{{item.id}}" bindtap="openPlay"><image class="region-art" src="/assets/regions/{{item.art}}.svg" mode="aspectFit" /><view class="card-copy"><view class="card-tag">{{item.ready ? '牌型检查已开放' : '玩法入口 · 规则准备中'}}</view><view class="card-name">{{item.name}}</view><view class="card-caption">{{item.caption}}</view><view class="card-link">进入玩法　↗</view></view></button></view>
+</view>
