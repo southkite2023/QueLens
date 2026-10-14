@@ -30,7 +30,7 @@ test('特殊事件：天地替代牌型与根，杠上花2番，杠上炮/抢杠
   assert.equal(score(normal,{events:{winType:'self',opening:'heaven'}}).fan,5);
   assert.equal(score(normal,{events:{winType:'self',opening:'earth'}}).fan,5);
   const kong = score('m4 m5 m6 p1 p2 p3 p7 p8 p9 p5 p5',{melds:[{type:'kong',tile:'m1'}],events:{winType:'self',finish:'kongDraw'}});
-  assert.equal(kong.fan,3); // 1 root + 2 event fan
+  assert.equal(kong.fan,4); // 1 root + 2 event fan + 1 self draw
   assert.equal(score(normal,{events:{finish:'kongDiscard'}}).fan,1);
   assert.equal(score(normal,{events:{finish:'robKong'}}).fan,1);
   assert.throws(()=>score(normal,{events:{opening:'heaven'}}),/天地胡/);

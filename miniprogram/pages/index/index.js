@@ -7,81 +7,98 @@ const fields = [
   ['special','dragonPairs','龙七对（已含1根）'], ['special','goldenHook','金钩钓基础'], ['special','terminals','带幺九基础'], ['special','jiangTriplets','将对基础'], ['special','heaven','天胡固定番'], ['special','earth','地胡固定番'],
   ['events','kongDraw','杠上花附加'], ['events','kongDiscard','杠上炮附加'], ['events','robKong','抢杠胡附加'], ['events','sea','海底附加（自选）'], ['events','declaredReady','报叫附加（自选）']
 ].map(([group,key,name]) => ({ group,key,name,value: String(rules[group][key]) }));
-const options = [ ['goldenHook','金钩钓'], ['terminals','带幺九'], ['jiangTriplets','将对'], ['sea','海底加番'], ['declaredReady','报叫加番'] ].map(([key,name]) => ({key,name,enabled:rules.optional[key]}));
+const fanColors = ['#26709d','#217b9a','#237c72','#648037','#a16d22','#b94b31','#b73732','#bd263d','#b51e37'];
+const lineTones = { dragonPairs:'crimson', heaven:'crimson', earth:'crimson', jiangTriplets:'crimson', pureSuit:'blue', sevenPairs:'violet', allTriplets:'teal', goldenHook:'amber', terminals:'amber', root:'green', kongDraw:'orange', kongDiscard:'orange', robKong:'orange', sea:'blue', declaredReady:'violet', selfDraw:'teal', standard:'neutral' };
 Page({
   data: {
-    palette: TILES.map(id => ({ id, label: label(id), suit: id[0] })), hand: [], selected: [], melds: [], count: 0, target: 14,
-    suits: ['万','筒','条'], missingIndex: 2, entryModes: ['手牌','碰（三张）','杠（四张）'], entryIndex: 0,
-    winTypes: ['点炮胡','自摸'], winIndex: 0, openings: ['普通开局','天胡（庄家起手即胡）','地胡（闲家起手听牌，首轮自摸）'], openingIndex: 0,
-    finishes: ['普通胡牌','杠上花（杠后补牌自摸）','杠上炮（他人杠后打出）','抢杠胡（抢他人补杠）'], finishIndex: 0,
-    sea: false, declaredReady: false, base: '1', multiplier: '1', cap: '5', result: '', scoring: null,
-    rulesExpanded: false, ruleFields: fields, optionalRules: options, sources: rules.sources,
-    selfDrawModes: ['自摸不加分','自摸加1番（封顶内/外按设置）','自摸加1底（封顶后）'], selfDrawIndex: 0,
-    capModes: ['总番封顶（含特殊加番）','牌型封顶，特殊加番在封顶外'], capIndex: 0,
-    openingModes: ['天地胡固定番（见番表）','天地胡直接按所设封顶番'], openingModeIndex: 0
+    palette:TILES.map(id=>({id,label:label(id),suit:id[0]})), hand:[],selected:[],melds:[],count:0,target:14, selectedIndex:-1, focusedLabel:'',
+    suits:['万','筒','条'],missingIndex:2,
+    winTypes:['点炮胡','自摸 ×2'],winIndex:0,
+    openings:['普通','天胡','地胡'],openingIndex:0,
+    finishes:['普通','杠上花','杠上炮','抢杠胡'],finishIndex:0,
+    sea:false,declaredReady:false,base:'1',caps:[1,2,3,4,5,6,7,8],capIndex:4,cap:'5',
+    result:'',scoring:null,rulesExpanded:false,ruleFields:fields,sources:rules.sources,formulaVisible:false
   },
-  invalidate(data) { this.setData({ ...data, result: '', scoring: null }); },
-  updateHand(hand, melds = this.data.melds) {
-    this.invalidate({ hand, melds, selected: hand.map((id,index) => ({id,index,label:label(id)})), count: hand.length, target: 14 - melds.length * 3 });
+  invalidate(data) { this.setData({...data,result:'',scoring:null,formulaVisible:false}); },
+  updateHand(hand,melds=this.data.melds) {
+    this.invalidate({hand,melds:melds.map(m=>({...m,label:label(m.tile),name:m.type==='pong'?'碰':'杠',tiles:Array.from({length:m.type==='kong'?4:3},(_,slot)=>({slot,label:label(m.tile)}))})),selected:hand.map((id,index)=>({id,index,label:label(id),focused:false})),count:hand.length,target:14-melds.length*3,selectedIndex:-1,focusedLabel:''});
   },
   addTile(event) {
-    const id = event.currentTarget.dataset.id;
+    const id=event.currentTarget.dataset.id;
     if (!TILES.includes(id)) return;
-    const type = ['hand','pong','kong'][this.data.entryIndex];
-    const amount = type === 'hand' ? 1 : type === 'pong' ? 3 : 4;
-    const physical = this.data.hand.filter(t => t === id).length + this.data.melds.filter(m => m.tile === id).reduce((sum,m) => sum + (m.type === 'kong' ? 4 : 3),0);
-    if (physical + amount > 4) return wx.showToast({ title: '同牌最多4张（含碰杠）', icon: 'none' });
-    if (type === 'hand') {
-      if (this.data.hand.length >= this.data.target) return wx.showToast({ title: '手牌已满，请先移除', icon: 'none' });
-      this.updateHand(this.data.hand.concat(id));
-    } else {
-      if (this.data.melds.length >= 4 || this.data.hand.length > this.data.target - 3) return wx.showToast({ title: '请先移除手牌，再录入碰杠', icon: 'none' });
-      this.updateHand(this.data.hand, this.data.melds.concat({type,tile:id,label:label(id),name:type === 'pong' ? '碰' : '杠'}));
-    }
+    const physical=this.data.hand.filter(t=>t===id).length+this.data.melds.filter(m=>m.tile===id).reduce((sum,m)=>sum+(m.type==='kong'?4:3),0);
+    if (physical>=4) return wx.showToast({title:'同牌最多4张（含明牌）',icon:'none'});
+    if (this.data.hand.length>=this.data.target) return wx.showToast({title:'手牌已满，请先移除或转成碰杠',icon:'none'});
+    this.updateHand(this.data.hand.concat(id));
   },
-  removeTile(event) { const hand = this.data.hand.slice(); hand.splice(Number(event.currentTarget.dataset.index),1); this.updateHand(hand); },
-  removeMeld(event) { const melds = this.data.melds.slice(); melds.splice(Number(event.currentTarget.dataset.index),1); this.updateHand(this.data.hand,melds); },
-  clear() { this.invalidate({ openingIndex:0,finishIndex:0,sea:false,declaredReady:false }); this.updateHand([],[]); },
-  sample() { this.invalidate({ missingIndex:2,winIndex:0,openingIndex:0,finishIndex:0,sea:false,declaredReady:false }); this.updateHand(['m1','m2','m3','m4','m5','m6','p1','p2','p3','p7','p8','p9','p5','p5'],[]); },
-  changeSuit(event) { this.invalidate({ missingIndex:Number(event.detail.value) }); },
-  changePicker(event) {
-    const key = event.currentTarget.dataset.key;
-    if (!['entryIndex','winIndex','openingIndex','finishIndex','selfDrawIndex','capIndex','openingModeIndex'].includes(key)) return;
-    const value = Number(event.detail.value), data = { [key]:value };
-    if (key === 'openingIndex' && value > 0) Object.assign(data,{winIndex:1,finishIndex:0,sea:false,declaredReady:false});
-    if (key === 'finishIndex' && value > 0) Object.assign(data,{openingIndex:0,winIndex:value === 1 ? 1 : 0});
+  selectTile(event) {
+    const index=Number(event.currentTarget.dataset.index);
+    if (!Number.isInteger(index)||index<0||index>=this.data.hand.length) return;
+    const selectedIndex=this.data.selectedIndex===index?-1:index;
+    this.setData({selectedIndex,focusedLabel:selectedIndex<0?'':label(this.data.hand[selectedIndex]),selected:this.data.selected.map(t=>({...t,focused:t.index===selectedIndex}))});
+  },
+  removeFocused() {
+    const index=this.data.selectedIndex;
+    if (index<0) return;
+    const hand=this.data.hand.slice();hand.splice(index,1);this.updateHand(hand);
+  },
+  makeMeld(event) {
+    const type=event.currentTarget.dataset.type;
+    if (!['pong','kong'].includes(type)||this.data.selectedIndex<0) return;
+    if (this.data.melds.length>=4) return wx.showToast({title:'最多四组碰杠',icon:'none'});
+    const tile=this.data.hand[this.data.selectedIndex],amount=type==='pong'?3:4;
+    if (this.data.hand.filter(id=>id===tile).length<amount) return wx.showToast({title:'手牌中需要'+amount+'张相同牌',icon:'none'});
+    let remaining=amount;
+    const hand=this.data.hand.filter(id=>{if(id===tile&&remaining>0){remaining--;return false;}return true;});
+    this.updateHand(hand,this.data.melds.concat({type,tile}));
+  },
+  restoreMeld(event) {
+    const index=Number(event.currentTarget.dataset.index);
+    if (!Number.isInteger(index)||index<0||index>=this.data.melds.length) return;
+    const meld=this.data.melds[index],melds=this.data.melds.slice();melds.splice(index,1);
+    this.updateHand(this.data.hand.concat(Array(meld.type==='kong'?4:3).fill(meld.tile)),melds);
+    if(this.data.hand.length>this.data.target) wx.showToast({title:'杠牌已退回，请移除多余补牌',icon:'none'});
+  },
+  clear() { this.invalidate({openingIndex:0,finishIndex:0,sea:false,declaredReady:false});this.updateHand([],[]); },
+  choose(event) {
+    const {key,value}=event.currentTarget.dataset;
+    const sizes={missingIndex:3,winIndex:2,openingIndex:3,finishIndex:4},n=Number(value);
+    if(!sizes[key]||!Number.isInteger(n)||n<0||n>=sizes[key]) return;
+    const data={[key]:n};
+    if(key==='openingIndex'&&n>0) Object.assign(data,{winIndex:1,finishIndex:0,sea:false,declaredReady:false});
+    if(key==='finishIndex'&&n>0) Object.assign(data,{openingIndex:0,winIndex:n===1?1:0});
+    if(key==='winIndex'&&n===0) {data.openingIndex=0;if(this.data.finishIndex===1)data.finishIndex=0;}
+    if(key==='winIndex'&&n===1&&this.data.finishIndex>1) data.finishIndex=0;
     this.invalidate(data);
   },
-  changeNumber(event) { const key = event.currentTarget.dataset.key; if (['base','multiplier','cap'].includes(key)) this.invalidate({[key]:event.detail.value}); },
-  changeEvent(event) { const key = event.currentTarget.dataset.key; if (['sea','declaredReady'].includes(key)) this.invalidate({[key]:event.detail.value}); },
+  toggleEvent(event) {
+    const key=event.currentTarget.dataset.key;
+    if(!['sea','declaredReady'].includes(key)) return;
+    const data={[key]:!this.data[key]};
+    if(data[key]) data.openingIndex=0;
+    if(key==='sea'&&data.sea&&this.data.finishIndex===3)data.finishIndex=0;
+    this.invalidate(data);
+  },
+  changeBase(event) { this.invalidate({base:event.detail.value}); },
+  changeCap(event) {
+    const index=Number(event.detail.value);
+    if(Number.isInteger(index)&&index>=0&&index<this.data.caps.length)this.invalidate({capIndex:index,cap:String(this.data.caps[index])});
+  },
   toggleRules() { this.setData({rulesExpanded:!this.data.rulesExpanded}); },
-  changeRule(event) {
-    const key = event.currentTarget.dataset.key;
-    this.invalidate({ruleFields:this.data.ruleFields.map(field => field.key === key ? {...field,value:event.detail.value} : field)});
-  },
-  changeOptional(event) {
-    const key = event.currentTarget.dataset.key, enabled = event.detail.value;
-    const data = { optionalRules:this.data.optionalRules.map(item => item.key === key ? {...item,enabled} : item) };
-    if (!enabled && ['sea','declaredReady'].includes(key)) data[key] = false;
-    this.invalidate(data);
-  },
-  resetRules() { this.invalidate({ruleFields:fields.map(f => ({...f})),optionalRules:options.map(o => ({...o})),selfDrawIndex:0,capIndex:0,openingModeIndex:0,sea:false,declaredReady:false}); },
-  copySource(event) { const source = this.data.sources[Number(event.currentTarget.dataset.index)]; if (source) wx.setClipboardData({data:source.url}); },
+  copySource(event) { const source=this.data.sources[Number(event.currentTarget.dataset.index)];if(source)wx.setClipboardData({data:source.url}); },
   calculate() {
-    const analysis = analyzeHand({concealed:this.data.hand.slice(),melds:this.data.melds,missingSuit:['m','p','s'][this.data.missingIndex]});
-    if (analysis.status !== 'winning') return this.setData({result:analysis.error,scoring:null});
+    const analysis=analyzeHand({concealed:this.data.hand.slice(),melds:this.data.melds,missingSuit:['m','p','s'][this.data.missingIndex]});
+    if(analysis.status!=='winning')return this.setData({result:analysis.error,scoring:null,formulaVisible:false});
     try {
-      const profile = {...rules,fan:{...rules.fan},special:{...rules.special},events:{...rules.events},optional:{}};
-      for (const field of this.data.ruleFields) {
-        if (!/^\d{1,2}$/.test(field.value)) throw new Error(field.name + '须为0至16的整数');
-        profile[field.group][field.key] = Number(field.value);
-      }
-      this.data.optionalRules.forEach(item => {profile.optional[item.key] = item.enabled;});
-      profile.selfDrawMode = ['none','fan','base'][this.data.selfDrawIndex];
-      profile.capMode = ['all','base'][this.data.capIndex]; profile.openingMode = ['fixed','cap'][this.data.openingModeIndex];
-      const scoring = scoreHand(analysis,profile,{winType:['discard','self'][this.data.winIndex],opening:['none','heaven','earth'][this.data.openingIndex],finish:['normal','kongDraw','kongDiscard','robKong'][this.data.finishIndex],sea:this.data.sea,declaredReady:this.data.declaredReady},{base:this.data.base,multiplier:this.data.multiplier,cap:this.data.cap});
-      this.setData({result:'可组成胡牌，按当前参考场规计算',scoring});
-    } catch (error) { this.setData({result:error.message,scoring:null}); }
+      const profile={...rules,selfDrawMode:'fan',capMode:'all',openingMode:'fixed',optional:{...rules.optional,sea:true,declaredReady:true}};
+      const scoring=scoreHand(analysis,profile,{winType:['discard','self'][this.data.winIndex],opening:['none','heaven','earth'][this.data.openingIndex],finish:['normal','kongDraw','kongDiscard','robKong'][this.data.finishIndex],sea:this.data.sea,declaredReady:this.data.declaredReady},{base:this.data.base,multiplier:'1',cap:this.data.cap});
+      scoring.color=fanColors[Math.min(scoring.fan,8)];scoring.fanClass='heat-'+Math.min(scoring.fan,8)+(scoring.fan>=5?' gradient-ink':'');
+      scoring.lines=scoring.lines.map(line=>({...line,factor:2**line.fan,tone:lineTones[line.key]||'neutral'}));
+      this.setData({result:'这手牌，可以胡。',scoring,formulaVisible:false},()=>{
+        // Recreate the equation node so every calculation replays the CSS animation.
+        this.setData({formulaVisible:true});
+      });
+    }catch(error){this.setData({result:error.message,scoring:null,formulaVisible:false});}
   },
-  about() { wx.navigateTo({url:'/pages/about/about'}); }
+  about(){wx.navigateTo({url:'/pages/about/about'});}
 });

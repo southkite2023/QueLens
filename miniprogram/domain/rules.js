@@ -6,7 +6,7 @@ module.exports = {
   special: { goldenHook: 2, terminals: 2, jiangTriplets: 3, dragonPairs: 3, heaven: 5, earth: 5 },
   events: { kongDraw: 2, kongDiscard: 1, robKong: 1, sea: 1, declaredReady: 2 },
   optional: { goldenHook: true, terminals: true, jiangTriplets: true, sea: false, declaredReady: false },
-  selfDrawMode: 'none', capMode: 'all', openingMode: 'fixed',
+  selfDrawMode: 'fan', capMode: 'all', openingMode: 'fixed',
   sources: [
     { title: '四川赛事2025附件2-5（22—24页）', url: 'https://www.ssva.org.cn/upload/file/2025-08-22/6389146967009551555075859.pdf' },
     { title: '游戏茶苑：四川麻将算牌（倍数口径与可选场规）', url: 'https://www.gametea.com/news/202010/9858.html' },
