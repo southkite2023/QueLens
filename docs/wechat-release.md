@@ -28,3 +28,13 @@
 7. 检查微信实际上传包大小，准备截图、准确功能介绍和审核路径，提审通过后再发布。
 
 Node 测试不等于微信真机测试或平台审核。游客 AppID 不能替代真实注册/上传资质。
+
+## 地区首页与位置入口
+
+启动页面为 `pages/home/home`，四川进入四个城市卡片，国标进入独立玩法页，日麻进入三人/四人卡片。只有成都接入已验收的手牌结构检查；其他玩法不复用成都算法。
+
+位置按钮先调用 `wx.requirePrivacyAuthorize`，同意后调用一次 `wx.getLocation`（WGS84，非高精度），不保存坐标、不上传、不在启动或后台读取。app.json 已声明 `scope.userLocation` 用途和 `requiredPrivateInfos: ["getLocation"]`。需要在微信公众平台完成位置接口权限申请及隐私保护指引的位置信息声明，使用真实 AppID 编译与真机验证；代码声明不等于后台已获得权限。官方依据：[getLocation](https://developers.weixin.qq.com/miniprogram/dev/api/location/wx.getLocation.html)、[隐私授权](https://developers.weixin.qq.com/miniprogram/dev/api/open-api/privacy/wx.requirePrivacyAuthorize.html)。
+
+当前采用本地附近城市匹配，无外部地图服务：距成都、泸州、乐山、内江市中心35公里以内且定位误差不大于5公里，才进入相应玩法页。误差计入距离阈值。这不是行政区划识别，无法覆盖城市全部辖区；不匹配时让用户手动选择。若需要覆盖全市/全国，后续接入有明确行政区划结果的服务，并补充域名和第三方隐私声明。
+
+验收补充：首页三张卡片、四川四张卡片、日麻两张卡片、国标入口、返回更换玩法；微信本地SVG显示、窄屏与大字体；首次授权同意/拒绝、系统位置关闭、接口未获权限、低版本、不匹配城市及精度不足。Node自动测试覆盖导航和定位回退，不能替代微信编译及真机验收。
