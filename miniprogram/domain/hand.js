@@ -58,6 +58,6 @@ function analyzeHand(input) {
   if (allTriplets) patterns.push('allTriplets');
   if (sevenPairs) patterns.push('sevenPairs');
   if (pureSuit) patterns.push('pureSuit');
-  return { status: 'winning', patterns, roots, decompositions: decomposed };
+  return { status: 'winning', patterns, roots, decompositions: decomposed, melds: input.melds.map(m => ({ ...m })), concealed: input.concealed.slice().sort((a, b) => indexOf(a) - indexOf(b)) };
 }
 module.exports = { validate, analyzeHand };

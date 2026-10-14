@@ -9,10 +9,12 @@
     <view wx:if="{{locationMessage}}" class="location-message" role="status">{{locationMessage}}</view>
   </view>
   <view class="section-heading">热门麻将 <text class="section-small">三种风味，随你选择</text></view>
+  <view class="card-grid">
   <button wx:for="{{regions}}" wx:key="id" class="region-card {{item.tone}}" data-id="{{item.id}}" bindtap="openRegion" disabled="{{locating}}" aria-label="{{item.name}}">
     <image class="region-art" src="/assets/regions/{{item.art}}.svg" mode="aspectFit" />
     <view class="card-copy"><view class="card-tag">{{item.tag}}</view><view class="card-name">{{item.name}}</view><view class="card-caption">{{item.caption}}</view><view class="card-link">探索玩法　↗</view></view>
   </button>
+  </view>
   <view class="footer-note">各地规则陆续收录 · 成都牌型检查已开放</view>
   <button class="text-button" bindtap="about">使用说明与隐私</button>
 </view>

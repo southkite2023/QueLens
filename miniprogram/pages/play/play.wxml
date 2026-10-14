@@ -1,6 +1,6 @@
 <view class="container" wx:if="{{variant}}">
   <view class="play-banner {{variant.tone}}"><image class="play-art" src="/assets/regions/{{variant.art}}.svg" mode="aspectFit" /><view class="title">{{variant.name}}</view><view class="muted">{{variant.caption}}</view></view>
-  <view class="card" wx:if="{{variant.ready}}"><view class="title">从一手牌开始</view><view class="muted">成都血战到底：手动录入14张手牌，检查定缺与基本胡牌结构。目前仅支持未碰杠手牌，番数表待确认。</view><button class="primary" bindtap="practice">开始牌型检查</button></view>
+  <view class="card" wx:if="{{variant.ready}}"><view class="title">从一手牌开始</view><view class="muted">成都血战到底：录入手牌与碰杠，补充胡牌经过，按可调整的参考场规检查牌型与算番。</view><button class="primary" bindtap="practice">开始录牌与算番</button></view>
   <view class="card" wx:else><view class="title">玩法已收录，规则准备中</view><view class="muted">这款玩法的规则与算番尚在整理，暂未开放牌型检查。后续将按独立规则接入。</view></view>
   <button bindtap="home">返回首页，切换玩法</button>
 </view>

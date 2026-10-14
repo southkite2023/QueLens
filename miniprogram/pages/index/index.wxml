@@ -1,20 +1,55 @@
-<view class="container">
-  <view class="title">雀镜</view>
-  <view class="muted intro">成都血战到底 · 牌型学习助手</view>
-  <view class="card">
-    <picker mode="selector" range="{{suits}}" value="{{missingIndex}}" bindchange="changeSuit"><view>定缺：{{suits[missingIndex]}}　›</view></picker>
-    <view class="muted">录入含胡牌张的14张手牌。本版仅支持未碰杠的手牌。</view>
-    <view class="tiles"><button wx:for="{{palette}}" wx:key="id" class="tile" data-id="{{item.id}}" bindtap="addTile">{{item.label}}</button></view>
+<view class="container practice">
+  <view class="title">成都麻将</view><view class="muted intro">录入牌面，再补上这一手的故事。</view>
+  <view class="card tile-card">
+    <view class="input-row"><picker mode="selector" range="{{suits}}" value="{{missingIndex}}" bindchange="changeSuit"><view>定缺：{{suits[missingIndex]}}　›</view></picker><picker range="{{entryModes}}" value="{{entryIndex}}" data-key="entryIndex" bindchange="changePicker"><view>录入：{{entryModes[entryIndex]}}　›</view></picker></view>
+    <view class="muted">万、筒、条各一排。碰杠请单独录入，手牌包含胡牌张。</view>
+    <view class="tiles palette"><button wx:for="{{palette}}" wx:key="id" class="tile suit-{{item.suit}}" data-id="{{item.id}}" bindtap="addTile" aria-label="录入{{item.label}}">{{item.label}}</button></view>
+  </view>
+  <view class="card tile-card">
+    <view>已选手牌 {{count}} / {{target}} 张 · {{melds.length}} 组碰杠</view><view class="muted">点击已选牌或碰杠可移除</view>
+    <view class="tiles selected"><button wx:for="{{selected}}" wx:key="index" class="tile chosen" data-index="{{item.index}}" bindtap="removeTile">{{item.label}}</button></view>
+    <view class="meld-list"><button wx:for="{{melds}}" wx:key="tile" class="meld" data-index="{{index}}" bindtap="removeMeld">{{item.name}} {{item.label}} × {{item.type === 'kong' ? 4 : 3}}　×</button></view>
+    <view class="small-actions"><button bindtap="clear">清空牌面</button><button bindtap="sample">练习示例</button></view>
   </view>
   <view class="card">
-    <view>已选 {{count}} / 14 张</view>
-    <view class="muted">点击已选牌可移除</view>
-    <view class="tiles"><button wx:for="{{selected}}" wx:key="index" class="tile chosen" data-index="{{item.index}}" bindtap="removeTile">{{item.label}}</button></view>
-    <button class="primary" bindtap="calculate">检查牌型</button>
-    <button bindtap="clear">清空手牌</button>
-    <button bindtap="sample">载入练习示例</button>
+    <view class="section-title">胡牌经过</view><view class="muted">这些信息无法从最终牌面推断，请按实际情况选择。</view>
+    <picker class="setting-row" range="{{winTypes}}" value="{{winIndex}}" data-key="winIndex" bindchange="changePicker"><view>胡牌方式 <text>{{winTypes[winIndex]}}　›</text></view></picker>
+    <picker class="setting-row" range="{{openings}}" value="{{openingIndex}}" data-key="openingIndex" bindchange="changePicker"><view>开局 <text>{{openings[openingIndex]}}　›</text></view></picker>
+    <picker class="setting-row" range="{{finishes}}" value="{{finishIndex}}" data-key="finishIndex" bindchange="changePicker"><view>杠后情况 <text>{{finishes[finishIndex]}}　›</text></view></picker>
+    <view class="setting-row"><text>海底（牌墙最后一张摸/打出的牌）</text><switch checked="{{sea}}" data-key="sea" bindchange="changeEvent" color="#147d64" /></view>
+    <view class="setting-row"><text>报叫（开局宣布听牌，后续不改手）</text><switch checked="{{declaredReady}}" data-key="declaredReady" bindchange="changeEvent" color="#147d64" /></view>
+    <view class="muted">海底和报叫须在下方场规中启用。天地胡按本页所示条件认定；不同牌桌可有差异。</view>
   </view>
-  <view wx:if="{{result}}" class="card result">{{result}}</view>
-  <view class="muted">番数规则正在确认。拍照识牌将在准备完成后开放。</view>
-  <button bindtap="about">使用说明与隐私</button>
+  <view class="card">
+    <view class="section-title">底分与场规</view><view class="number-grid">
+      <label><text>底分</text><input type="digit" value="{{base}}" data-key="base" bindinput="changeNumber" maxlength="10" /></label>
+      <label><text>额外倍数</text><input type="digit" value="{{multiplier}}" data-key="multiplier" bindinput="changeNumber" maxlength="10" /></label>
+      <label><text>封顶番数</text><input type="number" value="{{cap}}" data-key="cap" bindinput="changeNumber" maxlength="2" /></label>
+    </view><view class="muted">0番＝1倍，每加1番翻倍。底分 × 额外倍数 × 2的计分番数次方；自摸加底另按设置计入。</view>
+    <picker class="setting-row" range="{{selfDrawModes}}" value="{{selfDrawIndex}}" data-key="selfDrawIndex" bindchange="changePicker"><view>自摸 <text>{{selfDrawModes[selfDrawIndex]}}　›</text></view></picker>
+    <picker class="setting-row" range="{{capModes}}" value="{{capIndex}}" data-key="capIndex" bindchange="changePicker"><view>封顶 <text>{{capModes[capIndex]}}　›</text></view></picker>
+    <picker class="setting-row" range="{{openingModes}}" value="{{openingModeIndex}}" data-key="openingModeIndex" bindchange="changePicker"><view>天地胡 <text>{{openingModes[openingModeIndex]}}　›</text></view></picker>
+    <button class="rules-toggle" bindtap="toggleRules">{{rulesExpanded ? '收起番表与可选场规' : '查看 / 调整参考番表与场规'}}　{{rulesExpanded ? '−' : '+'}}</button>
+    <view wx:if="{{rulesExpanded}}">
+      <view class="muted">参考四川赛事基础分换算，允许按场规调整；并非统一官方成都番表。基础牌型取最高候选，清一色与未包含的根加番；龙七对已含1根，天地胡替代牌型与根。</view>
+      <view class="rule-table"><view wx:for="{{ruleFields}}" wx:key="key" class="rule-row"><text>{{item.name}}</text><view class="fan-edit"><input type="number" value="{{item.value}}" data-key="{{item.key}}" bindinput="changeRule" maxlength="2" /><text>番</text></view></view></view>
+      <view class="muted">默认：清对3番、清七对4番、清龙七对5番（含1根）、清幺九4番；额外的根另加。编辑番表后按当前配置重算。金钩钓必须录入4组碰杠，带幺九必须每组面子与将均带1或9，将对为全2/5/8的对对胡。</view>
+      <view wx:for="{{optionalRules}}" wx:key="key" class="setting-row"><text>启用{{item.name}}</text><switch checked="{{item.enabled}}" data-key="{{item.key}}" bindchange="changeOptional" color="#147d64" /></view>
+      <button bindtap="resetRules">恢复参考场规</button><view class="muted">规则来源（点击复制链接）：</view>
+      <button wx:for="{{sources}}" wx:key="url" class="source-link" data-index="{{index}}" bindtap="copySource">{{item.title}}</button>
+    </view>
+  </view>
+  <button class="primary calculate" bindtap="calculate">检查牌型与算番</button>
+  <view wx:if="{{result}}" class="card result">
+    <view>{{result}}</view>
+    <view wx:if="{{scoring}}">
+      <view class="score-head">{{scoring.fan}} 番 <text>× {{scoring.factor}} 倍</text></view>
+      <view wx:for="{{scoring.lines}}" wx:key="key" class="score-line"><text>{{item.label}}</text><text>{{item.fan}} 番</text></view>
+      <view class="muted">未封顶 {{scoring.rawFan}} 番 · {{scoring.cap}} 番封顶 · {{scoring.capMode === 'all' ? '含特殊加番' : '特殊加番在封顶外'}}</view>
+      <view wx:if="{{scoring.extraBase}}" class="muted">自摸加1底：封顶后的2的番数次方倍数，再加1倍底分；天地胡不再加自摸。</view>
+      <view class="score-total">单份参考分值：{{scoring.points}}</view><view class="muted">{{scoring.base}} × {{scoring.multiplier}} × {{scoring.factor}} ＝ {{scoring.points}}</view>
+      <view class="muted">这是单份胡牌分值，未乘付款人数；不含刮风下雨、包赔、呼叫转移、查叫或退税。</view>
+    </view>
+  </view>
+  <view class="muted">拍照识牌准备中。更改牌面、胡牌经过或场规后，请重新计算。</view><button bindtap="about">使用说明与隐私</button>
 </view>

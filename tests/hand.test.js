@@ -55,11 +55,11 @@ test('牌顺序不影响结果', () => {
   assert.deepEqual(analyzeHand({ ...normal, concealed: normal.concealed.slice().reverse() }), analyzeHand(normal));
 });
 test('未确认场规绝不展示数值', () => {
-  const result = scoreBasicHand(analyzeHand(normal), draft);
+  const result = scoreBasicHand(analyzeHand(normal), { ...draft, confirmed: false });
   assert.equal(result.status, 'rules-pending'); assert.equal(result.fan, undefined);
 });
 test('明确配置的基础番计算、互斥、叠加与封顶', () => {
-  const profile = { ...draft, confirmed: true };
+  const profile = { ...draft, confirmed: true, cap: 4 };
   assert.equal(scoreBasicHand(analyzeHand(normal), profile).fan, 0);
   assert.equal(scoreBasicHand(analyzeHand(triplets), profile).fan, 1);
   assert.equal(scoreBasicHand(analyzeHand(pairs), profile).fan, 2);
