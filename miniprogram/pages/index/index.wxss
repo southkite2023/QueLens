@@ -1,0 +1,5 @@
+.intro { margin-bottom: 28rpx; }
+.tiles { display: flex; flex-wrap: wrap; margin-top: 20rpx; }
+.tile { width: 18%; padding: 0; margin: 6rpx 1%; line-height: 72rpx; background: #edf5f1; color: #245d4c; }
+.chosen { background: #e5ecea; }
+.result { line-height: 1.8; }

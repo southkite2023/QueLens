@@ -1,0 +1,13 @@
+{
+  "name": "quelens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "雀镜 · 微信小程序麻将牌型工具",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node scripts/check.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

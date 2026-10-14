@@ -1,0 +1,13 @@
+{
+  "description": "雀镜原生微信小程序",
+  "miniprogramRoot": "miniprogram/",
+  "compileType": "miniprogram",
+  "appid": "touristappid",
+  "projectname": "QueLens",
+  "setting": {
+    "es6": true,
+    "minified": true,
+    "urlCheck": true
+  },
+  "libVersion": "3.1.0"
+}
