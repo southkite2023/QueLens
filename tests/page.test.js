@@ -9,11 +9,11 @@ const normal=['m1','m2','m3','m4','m5','m6','p1','p2','p3','p7','p8','p9','p5','
 const tap=(key,value)=>({currentTarget:{dataset:{key,value}}});
 const tile=id=>({currentTarget:{dataset:{id}}});
 const select=index=>({currentTarget:{dataset:{index}}});
-test('录入限制、选牌移除、改定缺与清空均清除旧结果',()=>{
+test('录入限制、选牌移除、更改选项与清空均清除旧结果',()=>{
  const page=load();for(let n=0;n<5;n++)page.addTile(tile('m1'));assert.equal(page.data.count,4);
  page.selectTile(select(0));page.removeFocused();assert.equal(page.data.count,3);
  page.updateHand(normal);page.addTile(tile('m9'));assert.equal(page.data.count,14);page.calculate();assert.equal(page.data.scoring.points,1);
- page.choose(tap('missingIndex',0));assert.equal(page.data.scoring,null);page.calculate();assert.match(page.data.result,/定缺/);
+ page.changeBase({detail:{value:'2'}});assert.equal(page.data.scoring,null);page.calculate();assert.equal(page.data.scoring.points,2);
  page.clear();assert.equal(page.data.count,0);assert.equal(page.data.melds.length,0);
 });
 test('从手牌转碰，保留实体数量；退回碰不丢牌',()=>{
@@ -40,7 +40,7 @@ test('直接点选联动避免明显冲突，自摸默认翻倍并包含在封�
  page.choose(tap('finishIndex',3));assert.equal(page.data.winIndex,0);page.choose(tap('winIndex',1));assert.equal(page.data.finishIndex,0);
  page.toggleEvent(tap('sea'));page.calculate();assert.equal(page.data.scoring.fan,2);
  page.changeCap({detail:{value:'0'}});assert.equal(page.data.cap,'1');page.calculate();assert.equal(page.data.scoring.fan,1);
- page.changeCap({detail:{value:'7'}});assert.equal(page.data.cap,'8');page.changeCap({detail:{value:'8'}});assert.equal(page.data.cap,'8');
+ page.changeCap({detail:{value:'7'}});assert.equal(page.data.cap,'8');page.changeCap({detail:{value:'15'}});assert.equal(page.data.cap,'16');page.changeCap({detail:{value:'16'}});assert.equal(page.data.cap,'16');
 });
 test('算式、次方色彩与解释倍数保持一致；没有练习与额外倍数输入',()=>{
  const page=load();assert.equal(page.sample,undefined);assert.equal(page.data.multiplier,undefined);
@@ -50,4 +50,14 @@ test('算式、次方色彩与解释倍数保持一致；没有练习与额外�
  assert.equal(page.data.scoring.lines.find(l=>l.key==='pureSuit').tone,'blue');assert.equal(page.data.scoring.points,32);
  page.changeBase({detail:{value:'2.5'}});assert.equal(page.data.scoring,null);page.calculate();assert.equal(page.data.scoring.points,80);
  page.changeBase({detail:{value:''}});page.calculate();assert.equal(page.data.scoring,null);
+});
+
+test('自动检查缺门，包含明牌；不再依赖定缺选择',()=>{
+ const page=load();
+ page.updateHand(['m1','m2','m3','m4','m5','m6','s1','s2','s3','s7','s8','s9','s5','s5']);
+ page.calculate();assert.ok(page.data.scoring);assert.equal(page.data.missingIndex,undefined);
+ page.updateHand(['m1','m2','m3','p4','p5','p6','s1','s2','s3','s7','s8','s9','s5','s5']);
+ page.calculate();assert.equal(page.data.scoring,null);assert.match(page.data.result,/缺一门/);
+ page.updateHand(['p4','p5','p6','s1','s2','s3','s7','s8','s9','s5','s5'],[{type:'pong',tile:'m1'}]);
+ page.calculate();assert.equal(page.data.scoring,null);assert.match(page.data.result,/缺一门/);
 });
