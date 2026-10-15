@@ -13,5 +13,8 @@ const variants = [
   { id: 'riichi4', region: 'riichi', name: '四人麻将', caption: '四方相聚 · 四人立直', art: 'riichi4', tone: 'rose' }
 ];
 function getVariant(id) { return variants.find(item => item.id === id); }
-function playUrl(id) { return '/pages/play/play?variant=' + encodeURIComponent(id); }
+function playUrl(id) {
+  const variant = getVariant(id);
+  return (variant && variant.ready ? '/pages/index/index' : '/pages/play/play') + '?variant=' + encodeURIComponent(id);
+}
 module.exports = { regions, variants, getVariant, playUrl };

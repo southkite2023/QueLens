@@ -2,7 +2,7 @@ const { SUITS, indexOf } = require('./tiles');
 // concealed 包含胡牌张；碰/杠独立表示，杠计一个面子、四张实体牌。
 function validate(input) {
   if (!input || !Array.isArray(input.concealed) || !Array.isArray(input.melds)) return '手牌格式不正确';
-  if (SUITS.indexOf(input.missingSuit) < 0) return '请选择定缺花色';
+  if (input.missingSuit !== undefined && SUITS.indexOf(input.missingSuit) < 0) return '定缺花色无效';
   if (input.melds.length > 4) return '最多四组碰杠';
   const counts = Array(27).fill(0);
   for (const tile of input.concealed) {
@@ -14,6 +14,7 @@ function validate(input) {
   }
   if (counts.some(n => n > 4)) return '同一种牌不能超过四张（含碰杠）';
   if (input.concealed.length !== 14 - input.melds.length * 3) return '手牌数量与碰杠不匹配';
+  if (SUITS.every((_, suit) => counts.slice(suit * 9, suit * 9 + 9).some(Boolean))) return '胡牌时须缺一门，请检查手牌与明牌';
   if (counts.some((n, i) => n && Math.floor(i / 9) === SUITS.indexOf(input.missingSuit))) return '定缺花色尚未打完';
   return null;
 }

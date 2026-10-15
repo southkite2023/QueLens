@@ -12,11 +12,10 @@ const lineTones = { dragonPairs:'crimson', heaven:'crimson', earth:'crimson', ji
 Page({
   data: {
     palette:TILES.map(id=>({id,label:label(id),suit:id[0]})), hand:[],selected:[],melds:[],count:0,target:14, selectedIndex:-1, focusedLabel:'',
-    suits:['万','筒','条'],missingIndex:2,
     winTypes:['点炮胡','自摸 ×2'],winIndex:0,
     openings:['普通','天胡','地胡'],openingIndex:0,
     finishes:['普通','杠上花','杠上炮','抢杠胡'],finishIndex:0,
-    sea:false,declaredReady:false,base:'1',caps:[1,2,3,4,5,6,7,8],capIndex:4,cap:'5',
+    sea:false,declaredReady:false,base:'1',caps:Array.from({length:16},(_,i)=>i+1),capIndex:4,cap:'5',
     result:'',scoring:null,rulesExpanded:false,ruleFields:fields,sources:rules.sources,formulaVisible:false
   },
   invalidate(data) { this.setData({...data,result:'',scoring:null,formulaVisible:false}); },
@@ -62,7 +61,7 @@ Page({
   clear() { this.invalidate({openingIndex:0,finishIndex:0,sea:false,declaredReady:false});this.updateHand([],[]); },
   choose(event) {
     const {key,value}=event.currentTarget.dataset;
-    const sizes={missingIndex:3,winIndex:2,openingIndex:3,finishIndex:4},n=Number(value);
+    const sizes={winIndex:2,openingIndex:3,finishIndex:4},n=Number(value);
     if(!sizes[key]||!Number.isInteger(n)||n<0||n>=sizes[key]) return;
     const data={[key]:n};
     if(key==='openingIndex'&&n>0) Object.assign(data,{winIndex:1,finishIndex:0,sea:false,declaredReady:false});
@@ -87,7 +86,7 @@ Page({
   toggleRules() { this.setData({rulesExpanded:!this.data.rulesExpanded}); },
   copySource(event) { const source=this.data.sources[Number(event.currentTarget.dataset.index)];if(source)wx.setClipboardData({data:source.url}); },
   calculate() {
-    const analysis=analyzeHand({concealed:this.data.hand.slice(),melds:this.data.melds,missingSuit:['m','p','s'][this.data.missingIndex]});
+    const analysis=analyzeHand({concealed:this.data.hand.slice(),melds:this.data.melds});
     if(analysis.status!=='winning')return this.setData({result:analysis.error,scoring:null,formulaVisible:false});
     try {
       const profile={...rules,selfDrawMode:'fan',capMode:'all',openingMode:'fixed',optional:{...rules.optional,sea:true,declaredReady:true}};

@@ -1,7 +1,7 @@
 <view class="container practice">
   <view class="title">成都麻将</view><view class="muted intro">选好牌面，再说说这一手怎么胡。</view>
   <view class="card tile-card">
-    <view class="section-title">选牌</view><view class="suit-row"><text>定缺</text><view class="chips compact"><button wx:for="{{suits}}" wx:key="*this" class="chip {{missingIndex === index ? 'active' : ''}}" data-key="missingIndex" data-value="{{index}}" bindtap="choose">{{item}}</button></view></view>
+    <view class="section-title">选牌</view>
     <view class="muted">万、筒、条各一排；碰杠从下方已选手牌转入。</view>
     <view class="tiles palette"><button wx:for="{{palette}}" wx:key="id" class="tile suit-{{item.suit}}" data-id="{{item.id}}" bindtap="addTile" aria-label="录入{{item.label}}">{{item.label}}</button></view>
   </view>
@@ -38,8 +38,9 @@
     <view wx:if="{{scoring}}">
       <view class="equation-label">底分 × 2的番数次方</view>
       <view wx:if="{{formulaVisible}}" class="equation heat-{{scoring.fan}}" role="text" aria-label="{{scoring.base}}乘2的{{scoring.fan}}次方等于{{scoring.points}}分">
-        <text class="formula-base">{{scoring.base}}</text><text class="operator">×</text><view class="power"><text>2</text><text class="exponent {{scoring.fanClass}}" style="color: {{scoring.color}}">{{scoring.fan}}</text></view><text class="operator equals">＝</text><text class="formula-value {{scoring.fanClass}}" style="color: {{scoring.color}}">{{scoring.points}}</text><text class="points-unit">分</text>
+        <text class="formula-base">{{scoring.base}}</text><text class="operator">×</text><view class="power"><text>2</text><text class="exponent {{scoring.fanClass}}" style="color: {{scoring.color}}">{{scoring.fan}}</text></view>
       </view>
+      <view wx:if="{{formulaVisible}}" class="score-answer"><text class="operator equals">＝</text><text class="formula-value {{scoring.fanClass}}" style="color: {{scoring.color}}">{{scoring.points}}</text><text class="points-unit">分</text></view>
       <view class="muted equation-caption">{{scoring.base}} 乘 2 的 {{scoring.fan}} 次方 ＝ {{scoring.points}} 分</view>
       <view class="fan-summary">{{scoring.rawFan}} 番 → {{scoring.fan}} 番 <text>{{scoring.rawFan > scoring.fan ? '已达封顶' : '当前计分'}}</text> · {{scoring.cap}}番封顶</view>
       <view class="section-title breakdown-title">这手牌的组成</view>

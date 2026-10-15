@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const { createRequire } = require('node:module');
-const { regions, variants } = require('../miniprogram/domain/regions');
+const { regions, variants, playUrl } = require('../miniprogram/domain/regions');
 const { matchLocation, locateVariant } = require('../miniprogram/services/location');
 function load(name, api) {
   const file = path.resolve(__dirname, '../miniprogram/pages/' + name + '/' + name + '.js');
@@ -16,7 +16,7 @@ function load(name, api) {
 const event = id => ({ currentTarget: { dataset: { id } } });
 test('三个地区入口、四个四川城市与三/四人日麻跳转', () => {
   const urls = [];
-  const api = { navigateTo(o) { urls.push(o.url); }, setNavigationBarTitle() {} };
+  const api = { navigateTo(o) { urls.push(o.url); }, setNavigationBarTitle() {}, redirectTo(o) { urls.push(o.url); } };
   const home = load('home', api);
   for (const region of regions) home.openRegion(event(region.id));
   assert.deepEqual(urls, ['/pages/region/region?id=sichuan', '/pages/play/play?variant=national', '/pages/region/region?id=riichi']);
@@ -27,9 +27,15 @@ test('三个地区入口、四个四川城市与三/四人日麻跳转', () => {
   assert.deepEqual(region.data.variants.map(v => v.id), ['riichi3', 'riichi4']);
   for (const variant of variants) {
     assert.ok(fs.existsSync(path.resolve(__dirname, '../miniprogram/assets/regions/' + variant.art + '.svg')));
+    const count = urls.length;
     const play = load('play', api); play.onLoad({ variant: variant.id });
-    const count = urls.length; play.practice();
-    assert.equal(urls.length - count, variant.ready ? 1 : 0);
+    if (variant.ready) {
+      assert.equal(playUrl(variant.id), '/pages/index/index?variant=' + variant.id);
+      assert.equal(urls[count], playUrl(variant.id));
+    } else {
+      assert.equal(playUrl(variant.id), '/pages/play/play?variant=' + variant.id);
+      assert.equal(play.data.variant.id, variant.id);
+    }
   }
 });
 test('未知入口安全回到首页', () => {
@@ -60,7 +66,7 @@ test('首页定位成功跳转；未匹配、拒绝和失败可恢复手动选�
     };
     const page = load('home',api); await page.locate();
     assert.equal(page.data.locating,false);
-    assert.equal(url,mode === 'success' ? '/pages/play/play?variant=chengdu' : undefined);
+    assert.equal(url,mode === 'success' ? '/pages/index/index?variant=chengdu' : undefined);
     assert.ok(page.data.locationMessage);
     page.openRegion(event('sichuan')); assert.equal(url,'/pages/region/region?id=sichuan');
   }

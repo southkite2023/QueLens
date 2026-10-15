@@ -30,7 +30,7 @@ test('非胡牌、未打完定缺、三门、数量错误', () => {
   assert.equal(analyzeHand(hand('m1 m2 m3 p1 p2 p3 s1 s2 s3 m4 m5 m6 p5 p5')).status, 'invalid');
   assert.equal(analyzeHand(hand('m1 m1')).status, 'invalid');
 });
-test('拒绝超过四张、字牌、无定缺、空输入', () => {
+test('拒绝超过四张、字牌、非法花色、空输入', () => {
   assert.equal(analyzeHand(hand('m1 m1 m1 m1 m1 m2 m3 p1 p2 p3 p4 p5 p6 p7')).status, 'invalid');
   assert.equal(analyzeHand({ ...normal, concealed: ['east'].concat(normal.concealed.slice(1)) }).status, 'invalid');
   assert.equal(analyzeHand({ ...normal, missingSuit: '' }).status, 'invalid');
